@@ -196,6 +196,52 @@ client-identifier abcd.1234.cafb
 end
 show ip dhcp binding
 
+!From PC: telnet 10.m.10.3:
+conf t
+ default int dot11radio 0
+ default interface gigabitEthernet 0
+hostname aironet-20
+ dot11 ssid SECPLUS-Mwifi
+ authentication open
+ authentication key-management wpa
+ wpa-psk ascii C1sc0123
+ guest-mode
+int dot11radio 0
+ no shut
+ channel 9
+ encryption mode ciphers tkip
+ ssid SECPLUS-Mwifi
+ bridge-group 1
+end
+
+Note: connect to your own wifi using your cellphoe and Browse:
+http://10.m.50.6
+http://10.m.50.8
+
+!CONFIDENTIALITY@ LAYER 3 SWITCH: VLAN ACCESS-LIST:
+config t
+! Create an extended ACL that matches ICMP (ping) traffic
+no ip access-list extended BLOCK_camera
+ip access-list extended BLOCK_camera
+ permit tcp any host 10.~~.50.6 eq 80
+ permit tcp any host 10.~~.50.8 eq 80
+!
+! Create the VLAN access-map
+vlan access-map BLOCK_CAM 10
+ match ip address BLOCK_camera
+ action drop
+!
+vlan access-map BLOCK_CAM 20
+ action forward
+!
+! Apply the map to VLAN 10
+vlan filter BLOCK_CAM vlan-list 10
+end
+show vlan access-map
+show vlan filter
+show ip access-lists BLOCK_camera
+
+
 TASK2***TASK2***TASK2***
 TASK2***TASK2***TASK2***
 CALLMANAGER EXPRESS CONFIGURATION FOR VOIP/TELEPHONY ENGINEERS
